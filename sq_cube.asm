@@ -1,0 +1,89 @@
+ .MODEL SMALL
+.STACK 100H
+.DATA
+
+MSG1 DB 10, 13, "ENTER A NUMBER: $"
+MSG2 DB 10, 13, "SQUARED: $"
+MSG3 DB 10, 13, "CUBED: $"
+NUM DW ?
+SQ DW ?
+CUBED DW ?
+
+.CODE
+MAIN PROC
+    MOV AX, @DATA
+    MOV DS, AX
+    
+    MOV AH, 09H
+    LEA DX, MSG1
+    INT 21H
+    
+    MOV AH, 01H
+    INT 21H
+    
+    SUB AL, 30H
+    MOV AH, 0
+    MOV NUM, AX 
+    
+    MOV AH, 09H
+    LEA DX, MSG2
+    INT 21H
+    
+    CALL SQUARE_NUMBER
+    
+    MOV AH, 09H
+    LEA DX, MSG3
+    INT 21H
+    
+    CALL CUBE_NUMBER 
+    
+    MOV AH, 4CH
+    INT 21H
+    
+MAIN ENDP
+
+
+SQUARE_NUMBER PROC
+    MOV AX, NUM
+    MOV BX, AX
+    MUL BX 
+    MOV SQ, AX
+    CALL PRINT
+    RET
+SQUARE_NUMBER ENDP
+
+CUBE_NUMBER PROC
+    MOV AX, NUM
+    MOV BX, AX
+    MUL BX
+    MUL BX
+    MOV CUBED, AX
+    CALL PRINT
+    RET
+CUBE_NUMBER ENDP
+
+PRINT PROC 
+    MOV CX, 0
+    
+    CONVERT:
+    MOV BX, 10
+    MOV DX, 0
+    DIV BX 
+    ADD DL, "0"
+    PUSH DX
+    INC CX
+    
+    CMP AX, 0
+    JNE CONVERT
+    
+    PRINT_LOOP:
+    POP DX
+    MOV AH, 02H
+    INT 21H
+    LOOP PRINT_LOOP
+    RET 
+PRINT ENDP
+    
+    
+     
+END MAIN  

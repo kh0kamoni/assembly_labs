@@ -1,0 +1,35 @@
+.MODEL SMALL
+.STACK 100H
+.DATA
+MSG1 DB "ENTER STRING: $"
+MSG2 DB 10, 13, "YOU HAVE ENTERED STRING: $"
+BUFFER DB 100, ?, 100 DUP("$")   
+.CODE
+MAIN PROC
+    MOV AX, @DATA
+    MOV DS, AX
+    
+    ; TAKE USER INPUT 
+    MOV AH, 09H
+    LEA DX, MSG1
+    INT 21H
+    
+    MOV AH, 0AH
+    LEA DX, BUFFER
+    INT 21H
+    
+    ; PRINT THE BUFFER
+    MOV AH, 09H
+    LEA DX, MSG2
+    INT 21H
+    
+    MOV AH, 09H
+    LEA DX, BUFFER + 2
+    INT 21H
+    
+    EXIT:
+    MOV AH, 4CH
+    MOV AL, 0
+    INT 21H
+MAIN ENDP
+END MAIN

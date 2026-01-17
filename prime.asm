@@ -1,0 +1,78 @@
+.MODEL SMALL
+.STACK 100H
+.DATA
+NUM DB ?
+PRIMEE DB 10, 13, "THIS IS A PRIME NUMBER.$"
+COMPOSITE DB 10, 13, "THIS IS A COMPOSITE NUMBER.$"
+PROMPT DB 10, 13, "ENTER A NUMBER: $"
+
+.CODE 
+MAIN PROC
+    MOV AX, @DATA
+    MOV DS, AX
+    
+    
+    MOV AH, 09H  
+    LEA DX, PROMPT
+    INT 21H
+    
+    
+    MOV BX, 0
+INPUT_LOOP:
+    MOV AH, 01H
+    INT 21H
+    CMP AL, 13
+    JE DONE
+    
+    SUB AL, 30H
+    MOV CL, AL
+    MOV AL, BL
+    MOV DL, 10
+    MUL DL
+    ADD AL, CL
+    MOV BL, AL
+    JMP INPUT_LOOP
+    
+DONE:
+    MOV NUM, BL
+    
+PRIME_CHECK:
+    MOV AL, NUM
+    CMP AL, 0
+    JE NOT_PRIME
+    CMP AL, 1
+    JE NOT_PRIME
+    CMP AL, 2
+    JE IS_PRIME
+
+    MOV CL, 2        
+
+DIV_LOOP:
+    MOV AH, 0
+    MOV AL, NUM
+    DIV CL           
+    CMP AH, 0
+    JE NOT_PRIME     
+    
+    INC CL
+    MOV AL, CL
+    CMP AL, NUM
+    JL DIV_LOOP      
+    
+IS_PRIME:
+    MOV AH, 09H
+    LEA DX, PRIMEE
+    INT 21H 
+    JMP EXIT
+    
+NOT_PRIME:
+    MOV AH, 09H
+    LEA DX, COMPOSITE
+    INT 21H   
+    
+EXIT:
+    MOV AH, 4CH
+    INT 21H
+    
+MAIN ENDP
+END MAIN

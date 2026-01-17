@@ -1,0 +1,38 @@
+.MODEL SMALL
+.STACK 100H
+.DATA
+MSG1 DB "ENTER A SINGLE CHARACTER: $"
+MSG2 DB 10, 13, "YOU HAVE ENTERED: $" 
+
+.CODE
+MAIN PROC
+    MOV AX, @DATA
+    MOV DS, AX
+    
+
+    MOV AH, 09H
+    LEA DX, MSG1
+    INT 21H
+    
+    MOV AH, 01H
+    INT 21H
+    
+    MOV BL, AL
+    
+
+    MOV AH, 09H
+    LEA DX, MSG2
+    INT 21H
+    
+    MOV AH, 02H
+    MOV DL, BL
+    INT 21H
+    
+    EXIT:
+    MOV AH, 4CH
+    MOV AL, 0
+    INT 21H
+MAIN ENDP 
+END MAIN
+    
+    

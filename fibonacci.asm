@@ -1,0 +1,162 @@
+.MODEL SMALL
+.STACK 100H
+.DATA
+    MSG1 DB 10, 13, "ENTER HOW MANY FIBONACCI NUMBERS TO GENERATE: $"
+    MSG2 DB 10, 13, "FIBONACCI SERIES: $"
+    NEWLINE DB 10, 13, "$"
+    SPACE DB " $"
+    COUNT DW ?
+    FIRST DW 0
+    SECOND DW 1
+    NEXT DW ?
+
+.CODE
+MAIN PROC
+    MOV AX, @DATA
+    MOV DS, AX
+    
+    MOV AH, 09H
+    LEA DX, MSG1
+    INT 21H
+    
+    CALL INPUT_NUMBER
+    MOV COUNT, AX
+    
+    MOV AH, 09H
+    LEA DX, MSG2
+    INT 21H
+    
+    CMP COUNT, 0
+    JE EXIT_PROGRAM
+    
+    MOV AX, FIRST
+    CALL PRINT_NUMBER
+    
+    MOV AH, 09H
+    LEA DX, SPACE
+    INT 21H
+    
+    CMP COUNT, 1
+    JE EXIT_PROGRAM
+    
+    MOV AX, SECOND
+    CALL PRINT_NUMBER
+    
+    MOV AH, 09H
+    LEA DX, SPACE
+    INT 21H
+    
+    MOV CX, COUNT
+    SUB CX, 2
+    CMP CX, 0
+    JLE EXIT_PROGRAM
+    
+FIBONACCI_LOOP:
+    MOV AX, FIRST
+    ADD AX, SECOND
+    MOV NEXT, AX
+    
+    CALL PRINT_NUMBER
+    
+    PUSH AX
+    MOV AH, 09H
+    LEA DX, SPACE
+    INT 21H
+    POP AX
+    
+    MOV AX, SECOND
+    MOV FIRST, AX
+    MOV AX, NEXT
+    MOV SECOND, AX
+    
+    LOOP FIBONACCI_LOOP
+    
+EXIT_PROGRAM:
+    MOV AH, 09H
+    LEA DX, NEWLINE
+    INT 21H
+    
+    MOV AH, 4CH
+    INT 21H
+    
+MAIN ENDP
+
+
+INPUT_NUMBER PROC
+    PUSH BX
+    PUSH CX
+    PUSH DX
+    
+    MOV BX, 0
+    
+INPUT_LOOP:
+    MOV AH, 01H
+    INT 21H
+    
+    CMP AL, 13
+    JE INPUT_DONE
+    
+    SUB AL, '0'
+    MOV CL, AL
+    MOV CH, 0
+    
+    MOV AX, BX
+    MOV DX, 10
+    MUL DX
+    ADD AX, CX
+    MOV BX, AX
+    
+    JMP INPUT_LOOP
+    
+INPUT_DONE:
+    MOV AX, BX
+    
+    POP DX
+    POP CX
+    POP BX
+    RET
+INPUT_NUMBER ENDP
+
+
+PRINT_NUMBER PROC
+    PUSH AX
+    PUSH BX
+    PUSH CX
+    PUSH DX
+    
+    CMP AX, 0
+    JNE CONVERT_START
+
+    MOV AH, 02H
+    MOV DL, '0'
+    INT 21H
+    JMP PRINT_DONE
+    
+CONVERT_START:
+    MOV CX, 0
+    MOV BX, 10
+    
+CONVERT_LOOP:
+    MOV DX, 0
+    DIV BX
+    ADD DL, '0'
+    PUSH DX
+    INC CX
+    CMP AX, 0
+    JNE CONVERT_LOOP
+    
+PRINT_LOOP:
+    POP DX
+    MOV AH, 02H
+    INT 21H
+    LOOP PRINT_LOOP
+    
+PRINT_DONE:
+    POP DX
+    POP CX
+    POP BX
+    POP AX
+    RET
+PRINT_NUMBER ENDP
+
+END MAIN

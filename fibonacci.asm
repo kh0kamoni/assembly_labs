@@ -19,7 +19,7 @@ MAIN PROC
     LEA DX, MSG1
     INT 21H
     
-    CALL INPUT_NUMBER
+    CALL GET_NUM
     MOV COUNT, AX
     
     MOV AH, 09H
@@ -30,7 +30,7 @@ MAIN PROC
     JE EXIT_PROGRAM
     
     MOV AX, FIRST
-    CALL PRINT_NUMBER
+    CALL PRINT
     
     MOV AH, 09H
     LEA DX, SPACE
@@ -40,7 +40,7 @@ MAIN PROC
     JE EXIT_PROGRAM
     
     MOV AX, SECOND
-    CALL PRINT_NUMBER
+    CALL PRINT
     
     MOV AH, 09H
     LEA DX, SPACE
@@ -56,7 +56,7 @@ FIBONACCI_LOOP:
     ADD AX, SECOND
     MOV NEXT, AX
     
-    CALL PRINT_NUMBER
+    CALL PRINT
     
     PUSH AX
     MOV AH, 09H
@@ -81,22 +81,28 @@ EXIT_PROGRAM:
     
 MAIN ENDP
 
-
-INPUT_NUMBER PROC
+GET_NUM PROC
     PUSH BX
     PUSH CX
     PUSH DX
     
     MOV BX, 0
     
-INPUT_LOOP:
+    READ:
     MOV AH, 01H
     INT 21H
     
     CMP AL, 13
-    JE INPUT_DONE
+    JE DONE
     
-    SUB AL, '0'
+    CMP AL, "0"
+    JL READ
+    
+    CMP AL, "9"
+    JG READ
+    
+    SUB AL, "0"
+    
     MOV CL, AL
     MOV CH, 0
     
@@ -105,58 +111,50 @@ INPUT_LOOP:
     MUL DX
     ADD AX, CX
     MOV BX, AX
+    JMP READ 
     
-    JMP INPUT_LOOP
-    
-INPUT_DONE:
+    DONE:
     MOV AX, BX
     
     POP DX
     POP CX
     POP BX
+    
     RET
-INPUT_NUMBER ENDP
+GET_NUM ENDP
 
-
-PRINT_NUMBER PROC
+PRINT PROC
     PUSH AX
     PUSH BX
     PUSH CX
     PUSH DX
     
-    CMP AX, 0
-    JNE CONVERT_START
-
-    MOV AH, 02H
-    MOV DL, '0'
-    INT 21H
-    JMP PRINT_DONE
-    
-CONVERT_START:
     MOV CX, 0
     MOV BX, 10
     
-CONVERT_LOOP:
+    PUSH_LOOP:
     MOV DX, 0
     DIV BX
-    ADD DL, '0'
     PUSH DX
+    
     INC CX
     CMP AX, 0
-    JNE CONVERT_LOOP
+    JNE PUSH_LOOP
     
-PRINT_LOOP:
+    POP_LOOP:
     POP DX
+    ADD DL, "0"
     MOV AH, 02H
     INT 21H
-    LOOP PRINT_LOOP
     
-PRINT_DONE:
+    LOOP POP_LOOP
+    
     POP DX
     POP CX
     POP BX
     POP AX
+    
     RET
-PRINT_NUMBER ENDP
+PRINT ENDP
 
 END MAIN

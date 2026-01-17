@@ -1,11 +1,12 @@
 .MODEL SMALL
+.STACK 100H
 .DATA
 MSG1 DB "FIRST NUMBER: $"
 MSG2 DB 10, 13, "SECOND NUMBER: $"
-NUM1 DB ?
-NUM2 DB ?
-AVG DB ?
-REM DB ?
+NUM1 DW ?
+NUM2 DW ?
+AVG DW ?
+REM DW ?
 MSG3 DB 10, 13, "AVERAGE: $"
 .CODE
 MAIN PROC
@@ -17,33 +18,31 @@ MAIN PROC
     INT 21H
     
     CALL GET_NUM
-    MOV NUM1, AL
+    MOV NUM1, AX
     
     MOV AH, 09H
     LEA DX, MSG2
     INT 21H
     
     CALL GET_NUM
-    MOV NUM2, AL
+    MOV NUM2, AX
     
-    MOV AL, NUM1
-    MOV AH, 0
-    ADD AL, NUM2
-    MOV BL, 2
-    DIV BL
-    MOV AVG, AL
-    MOV REM, AH
+    MOV AX, NUM1
+    ADD AX, NUM2
+    MOV BX, 2
+    MOV DX, 0
+    DIV BX
+    MOV AVG, AX
+    MOV REM, DX
     
     MOV AH, 09H
     LEA DX, MSG3
     INT 21H
     
-    MOV AL, AVG
+    MOV AX, AVG
     CALL PRINT
     
-
     CALL PRINT_REM
-
     
     MOV AH, 4CH
     MOV AL, 0
@@ -57,9 +56,8 @@ GET_NUM PROC
     PUSH DX
     
     MOV BX, 0
-    MOV CX, 0
     
-    INPUT:
+    READ:
     MOV AH, 01H
     INT 21H
     
@@ -67,22 +65,25 @@ GET_NUM PROC
     JE DONE
     
     CMP AL, "0"
-    JL INPUT
+    JL READ
     
     CMP AL, "9"
-    JG INPUT
+    JG READ
     
     SUB AL, "0"
+    
     MOV CL, AL
-    MOV AL, BL
-    MOV DL, 10
-    MUL DL
-    ADD AL, CL
-    MOV BL, AL
-    JMP INPUT
+    MOV CH, 0
+    
+    MOV AX, BX
+    MOV DX, 10
+    MUL DX
+    ADD AX, CX
+    MOV BX, AX
+    JMP READ 
     
     DONE:
-    MOV AL, BL
+    MOV AX, BX
     
     POP DX
     POP CX
@@ -98,20 +99,19 @@ PRINT PROC
     PUSH DX
     
     MOV CX, 0
-    MOV BL, 10
+    MOV BX, 10
     
     PUSH_LOOP:
-    MOV AH, 0
-    DIV BL
-    PUSH AX
+    MOV DX, 0
+    DIV BX
+    PUSH DX
     
     INC CX
-    CMP AL, 0
+    CMP AX, 0
     JNE PUSH_LOOP
     
     POP_LOOP:
     POP DX
-    MOV DL, DH
     ADD DL, "0"
     MOV AH, 02H
     INT 21H
@@ -124,9 +124,7 @@ PRINT PROC
     POP AX
     
     RET
-    
 PRINT ENDP
-
 
 PRINT_REM PROC
     PUSH AX
@@ -134,23 +132,20 @@ PRINT_REM PROC
     PUSH CX
     PUSH DX
     
-
     MOV AH, 02H
     MOV DL, "."
     INT 21H
     
-
-    MOV AL, REM     
-    MOV AH, 0       
-    MOV BL, 10      
-    MUL BL          
+    MOV AX, REM
+    MOV BX, 10
+    MUL BX
     
-    MOV BL, 2       
-    DIV BL         
+    MOV BX, 2
+    MOV DX, 0
+    DIV BX
     
-
     MOV DL, AL
-    ADD DL, "0"    
+    ADD DL, "0"
     MOV AH, 02H
     INT 21H
     
